@@ -1,0 +1,146 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String   // bcrypt hashed
+  role      String   @default("user") // "admin" or "user"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  slug        String     @unique // "function-halls", "photography", "catering", "decoration", "transportation"
+  name        String
+  teluguName  String?
+  description String?
+  icon        String?
+  image       String?
+  order       Int        @default(0)
+  businesses  Business[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Business {
+  id                  String       @id @default(cuid())
+  categoryId          String
+  category            Category     @relation(fields: [categoryId], references: [id])
+  name                String
+  teluguName          String?
+  managerName         String?
+  phone               String
+  secondaryPhone      String?
+  email               String?
+  location            String       @default("Eluru")
+  serviceArea         String?
+  googleMapsUrl       String?
+  websiteUrl          String?
+  mainImage           String?
+  gallery             String?      // JSON string array of URLs
+  description         String?
+  advantages          String?
+  
+  // Specific attributes for Function Halls
+  seatingCapacity     String?      // e.g. "400–500"
+  carParking          Boolean      @default(false)
+  parkingDetails      String?
+  rooms               String?      // e.g. "4 AC rooms"
+  busAccess           String?      // e.g. "Bus allowed on the road"
+  
+  // Catering attributes
+  foodType            String?      // "vegetarian", "non-vegetarian", "both"
+  
+  // Photography & Decoration services
+  services            String?      // JSON string array or comma separated
+  
+  // Transportation attributes
+  vehicleTypes        String?      // e.g. "Cars and small buses"
+  vehicleCapacities   String?      // e.g. "4+1, 6+1, 7+1, 12+1"
+  acType              String?      // "AC", "Non-AC", "Both"
+  sleeperAvailable    Boolean      @default(false)
+  serviceType         String?      // "Private", "Government"
+  
+  // Status flags
+  isFeatured          Boolean      @default(false)
+  isActive            Boolean      @default(true)
+  viewCount           Int          @default(0)
+  
+  slots               Slot[]
+  enquiries           Enquiry[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+}
+
+model Slot {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  date        String   // "YYYY-MM-DD"
+  startTime   String   // "09:00"
+  endTime     String   // "14:00"
+  status      String   @default("AVAILABLE") // "AVAILABLE", "BOOKED", "BLOCKED"
+  notes       String?
+  customerName String?
+  customerPhone String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Enquiry {
+  id            String    @id @default(cuid())
+  businessId    String?
+  business      Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
+  categorySlug  String?
+  customerName  String
+  phone         String
+  email         String?
+  eventDate     String?
+  preferredSlot String?
+  message       String
+  status        String    @default("NEW") // "NEW", "CONTACTED", "CONFIRMED", "COMPLETED", "CANCELLED"
+  adminNotes    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  customerName String
+  eventType   String?
+  reviewText  String
+  rating      Int      @default(5)
+  isActive    Boolean  @default(false) // Must be approved by admin to show
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSetting {
+  id             String   @id @default("default")
+  websiteName    String   @default("ELURU EVENT LINKS")
+  teluguTagline  String   @default("ఒక్క క్లిక్‌తో.. పెళ్లి పనులు సులువుగా!")
+  founderName    String   @default("T. Ganesh Gowtham")
+  publicEmail    String   @default("Elurueventlinks@gmail.com")
+  primaryPhone   String   @default("+91 99495 31668")
+  whatsappNumber String   @default("+91 9603921666")
+  instagramUrl   String   @default("https://www.instagram.com/eluru_event_links?stkn=cGE5cXgzazlkYzNu")
+  address        String   @default("Eluru, Andhra Pradesh, India")
+  heroHeading    String   @default("Plan Your Perfect Event in Eluru")
+  heroDescription String  @default("Discover trusted local function halls, photographers, catering services, decorators, and transportation providers—all in one place.")
+  heroImage      String?  @default("https://media.base44.com/images/public/6aa2b93fe166d1acb5a7457c/d6f0f2a1e_Screenshot2026-09-10135914.png")
+  aboutText      String?
+  whyChooseUs    String?
+  footerText     String?
+  updatedAt      DateTime @updatedAt
+}
