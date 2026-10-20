@@ -77,3 +77,5 @@ npm run start
 - **URL**: `http://localhost:3000/admin`
 - **Authorized Email**: `eluruevents@gmail.com`
 - **Initial Password**: `Admin@Eluru2026!` (Configured via secure bcrypt hashing in database seed)
+
+# eluru-event-links
