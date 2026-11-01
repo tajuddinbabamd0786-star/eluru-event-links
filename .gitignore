@@ -45,3 +45,6 @@ desktop.ini
 
 # Vercel
 .vercel
+
+# Neon CLI local config (auth tokens — never commit)
+.config/
